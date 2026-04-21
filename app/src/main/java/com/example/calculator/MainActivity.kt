@@ -1,17 +1,15 @@
-package com.example.calculator // Замените на ваш package name
+package com.example.calculator 
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +85,21 @@ fun CalculatorScreen() {
                         clearDisplay = true
                     }
                 },
+                // Обработка нажатия на корень
+                onSqrtClick = {
+                    val currentNum = display.toDoubleOrNull()
+                    if (currentNum != null) {
+                        if (currentNum >= 0) {
+                            val result = kotlin.math.sqrt(currentNum)
+                            // Если результат целое число (например 5.0), можно отсечь .0, 
+                            // но для простоты оставим как было у автора
+                            display = result.toString()
+                        } else {
+                            display = "Ошибка" // Корень из отрицательного числа
+                        }
+                        clearDisplay = true // Следующий ввод начнет новое число
+                    }
+                },
                 onEqualsClick = {
                     if (firstNumber.isNotEmpty() && operation.isNotEmpty()) {
                         val first = firstNumber.toDoubleOrNull() ?: 0.0
@@ -131,6 +144,7 @@ fun CalculatorScreen() {
 fun CalculatorKeyboard(
     onDigitClick: (String) -> Unit,
     onOperationClick: (String) -> Unit,
+    onSqrtClick: () -> Unit, // НОВЫЙ ПАРАМЕТР: передаем функцию для корня
     onEqualsClick: () -> Unit,
     onClearClick: () -> Unit,
     onDotClick: () -> Unit
@@ -138,10 +152,9 @@ fun CalculatorKeyboard(
     Column(
         modifier = Modifier
             .fillMaxWidth(),
-            //.weight(4f),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Первая строка: C и /
+        // Первая строка: C, √ и /
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -161,6 +174,24 @@ fun CalculatorKeyboard(
             ) {
                 Text(
                     text = "C",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Корень (√)
+            Button(
+                onClick = onSqrtClick,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary // Использовал третий цвет из темы для красоты
+                )
+            ) {
+                Text(
+                    text = "√",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -338,7 +369,6 @@ fun CalculatorKeyboard(
 }
 
 // Вспомогательная функция для создания кнопок с цифрами
-
 @Composable
 fun CreateDigitButton(digit: String, onClick: (String) -> Unit) {
     Button(
@@ -364,4 +394,3 @@ fun Test() {
         onClick = TODO(),
     )
 }
-
